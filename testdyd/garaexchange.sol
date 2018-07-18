@@ -1,7 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 /**
-kovan : 0x6914ba10d036bb33d3db9d03f989b6583e2c563c
  * @title SafeMath
 
  * @dev Math operations with safety checks that throw on error
@@ -192,13 +191,13 @@ contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {
 /// @title Exchange - Facilitates exchange of ERC20 tokens.
 /// @author Amir Bandeali - <amir@0xProject.com>, Will Warren - <will@0xProject.com>
 contract Exchange is SafeMath {
+ 
     mapping (address => uint) public weth;
     struct Order { 
         address seller; 
         address NTFcontract;
         uint256 tokenID;
         uint256 fixedPrice;
-        bytes32 orderHash;
     }
     
     function deposit() payable public{
@@ -212,24 +211,7 @@ contract Exchange is SafeMath {
         msg.sender.transfer(amount);
     }
 
-    function isValidSignature(
-        address signer,
-        bytes32 hash,
-        uint8 v,
-        bytes32 r,
-        bytes32 s)
-        public
-        view
-        returns (bool)
-    {
-        return signer == ecrecover(hash, v, r, s);
-    }
-    
-    function getOrderHash(address[3] addereV, uint256[2] intV) public view returns (bytes32) {
-        return keccak256(address(this),addereV[1],addereV[2],intV[0],intV[1]);
-    }
-
-    function fillOrder(address[3] addereV, uint256[2] intV, uint8 v, bytes32 r, bytes32 s)
+    function fillOrder(address[3] addereV, uint256[2] intV)
           public
           returns (bool)
     {
@@ -238,18 +220,13 @@ contract Exchange is SafeMath {
             seller: addereV[1],
             NTFcontract: addereV[2],
             tokenID: intV[0],
-            fixedPrice: intV[1],
-            orderHash: getOrderHash(addereV, intV)
+            fixedPrice: intV[1]
         });
 
-        require(isValidSignature(order.seller,order.orderHash,v,r,s));
-        if(weth[msg.sender]>=order.fixedPrice){
-            ERC721(order.NTFcontract).transferFrom(order.seller, msg.sender, order.tokenID);
-            weth[msg.sender] = safeSub(weth[msg.sender], order.fixedPrice);
-            weth[order.seller] = safeAdd(weth[order.seller], order.fixedPrice);
-            return true;
-        }
-        return false;
+        ERC721(order.NTFcontract).transferFrom(order.seller, msg.sender, order.tokenID);
+        weth[msg.sender] = safeSub(weth[msg.sender], order.fixedPrice);
+        weth[order.seller] = safeAdd(weth[order.seller], order.fixedPrice);
+        return true;
     }
 
 }

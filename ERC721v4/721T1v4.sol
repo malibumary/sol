@@ -1,68 +1,57 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 
-//721 Token H 주소 : 0x7c68a2160575132fc9099b3573fdf1902c35c7fd
-//721 Token G 주소 : 0xc29fb173dab16d2406072593e29008d84185eb3f
-// 제플린 참조 https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts
-/**
- * @title ERC721 Non-Fungible Token Standard basic interface
- * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
- */
-contract ERC721Basic {
-    event Transfer(address indexed _from, address indexed _to, uint256 _tokenId);
-    event Approval(address indexed _owner, address indexed _approved, uint256 _tokenId);
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    function balanceOf(address _owner) public view returns (uint256 _balance);
-    function ownerOf(uint256 _tokenId) public view returns (address _owner);
-    function exists(uint256 _tokenId) public view returns (bool _exists);
-
-    function approve(address _to, uint256 _tokenId) public;
-    function getApproved(uint256 _tokenId) public view returns (address _operator);
-
-    function setApprovalForAll(address _operator, bool _approved) public;
-    function isApprovedForAll(address _owner, address _operator) public view returns (bool);
-
-    function transferFrom(address _from, address _to, uint256 _tokenId) public;
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public;
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes _data
-    )
-        public;
-}
+//delpoyed Rinkeby: 0xb46ff57e24483e4e7f891a8dc511e7226af47dcb
+//delpoyed Rinkeby: 0x3d8aaedb9461a39ff2bdf688b03001e34c6f6aae
 
 /**
- * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
- * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * @title Ownable
+ * @dev The Ownable contract has an owner address, and provides basic authorization control
+ * functions, this simplifies the implementation of "user permissions".
  */
-contract ERC721Enumerable is ERC721Basic {
-    function totalSupply() public view returns (uint256);
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) public view returns (uint256 _tokenId);
-    function tokenByIndex(uint256 _index) public view returns (uint256);
+contract Ownable {
+    address public owner;
+
+
+    event OwnershipRenounced(address indexed previousOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+
+    /**
+    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+    * account.
+    */
+    constructor() public {
+        owner = msg.sender;
+    }
+
+    /**
+    * @dev Throws if called by any account other than the owner.
+    */
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    /**
+    * @dev Allows the current owner to transfer control of the contract to a newOwner.
+    * @param newOwner The address to transfer ownership to.
+    */
+    function transferOwnership(address newOwner) public onlyOwner {
+        require(newOwner != address(0));
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
+    }
+
+    /**
+    * @dev Allows the current owner to relinquish control of the contract.
+    */
+    function renounceOwnership() public onlyOwner {
+        emit OwnershipRenounced(owner);
+        owner = address(0);
+    }
 }
 
-
-/**
- * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
- * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
- */
-contract ERC721Metadata is ERC721Basic {
-    function name() public view returns (string _name);
-    function symbol() public view returns (string _symbol);
-    function tokenURI(uint256 _tokenId) public view returns (string);
-}
-
-
-/**
- * @title ERC-721 Non-Fungible Token Standard, full implementation interface
- * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
- */
-contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {
-}
- 
 /**
  * @title ERC721 token receiver interface
  * @dev Interface for any contract that wants to support safeTransfers
@@ -90,7 +79,6 @@ contract ERC721Receiver {
     */
     function onERC721Received(address _from, uint256 _tokenId, bytes _data) public returns(bytes4);
 }
-
 /**
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
@@ -100,11 +88,11 @@ library SafeMath {
     /**
     * @dev Multiplies two numbers, throws on overflow.
     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
         if (a == 0) {
             return 0;
         }
-        uint256 c = a * b;
+        c = a * b;
         assert(c / a == b);
         return c;
     }
@@ -130,8 +118,8 @@ library SafeMath {
     /**
     * @dev Adds two numbers, throws on overflow.
     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
+    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
+        c = a + b;
         assert(c >= a);
         return c;
     }
@@ -163,6 +151,63 @@ library AddressUtils {
 
 }
 
+/**
+ * @title ERC721 Non-Fungible Token Standard basic interface
+ * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ */
+contract ERC721Basic {
+    event Transfer(address indexed _from, address indexed _to, uint256 _tokenId);
+    event Approval(address indexed _owner, address indexed _approved, uint256 _tokenId);
+    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    function balanceOf(address _owner) public view returns (uint256 _balance);
+    function ownerOf(uint256 _tokenId) public view returns (address _owner);
+    function exists(uint256 _tokenId) public view returns (bool _exists);
+
+    function approve(address _to, uint256 _tokenId) public;
+    function getApproved(uint256 _tokenId) public view returns (address _operator);
+
+    function setApprovalForAll(address _operator, bool _approved) public;
+    function isApprovedForAll(address _owner, address _operator) public view returns (bool);
+
+    function transferFrom(address _from, address _to, uint256 _tokenId) public;
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public;
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId,
+        bytes _data
+    )
+        public;
+}
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
+ * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ */
+contract ERC721Enumerable is ERC721Basic {
+    function totalSupply() public view returns (uint256);
+    function tokenOfOwnerByIndex(address _owner, uint256 _index) public view returns (uint256 _tokenId);
+    function tokenByIndex(uint256 _index) public view returns (uint256);
+}
+
+
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+ * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ */
+contract ERC721Metadata is ERC721Basic {
+    function name() public view returns (string _name);
+    function symbol() public view returns (string _symbol);
+    function tokenURI(uint256 _tokenId) public view returns (string);
+}
+
+
+/**
+ * @title ERC-721 Non-Fungible Token Standard, full implementation interface
+ * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ */
+contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {
+}
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
@@ -228,7 +273,7 @@ contract ERC721BasicToken is ERC721Basic {
 
     /**
     * @dev Returns whether the specified token exists
-    * @param _tokenId uint256 ID of the token to query the existance of
+    * @param _tokenId uint256 ID of the token to query the existence of
     * @return whether the token exists
     */
     function exists(uint256 _tokenId) public view returns (bool) {
@@ -251,14 +296,14 @@ contract ERC721BasicToken is ERC721Basic {
 
         if (getApproved(_tokenId) != address(0) || _to != address(0)) {
             tokenApprovals[_tokenId] = _to;
-            Approval(owner, _to, _tokenId);
+            emit Approval(owner, _to, _tokenId);
         }
     }
 
     /**
     * @dev Gets the approved address for a token ID, or zero if no address set
     * @param _tokenId uint256 ID of the token to query the approval of
-    * @return address currently approved for a the given token ID
+    * @return address currently approved for the given token ID
     */
     function getApproved(uint256 _tokenId) public view returns (address) {
         return tokenApprovals[_tokenId];
@@ -273,7 +318,7 @@ contract ERC721BasicToken is ERC721Basic {
     function setApprovalForAll(address _to, bool _approved) public {
         require(_to != msg.sender);
         operatorApprovals[msg.sender][_to] = _approved;
-        ApprovalForAll(msg.sender, _to, _approved);
+        emit ApprovalForAll(msg.sender, _to, _approved);
     }
 
     /**
@@ -302,7 +347,7 @@ contract ERC721BasicToken is ERC721Basic {
         removeTokenFrom(_from, _tokenId);
         addTokenTo(_to, _tokenId);
 
-        Transfer(_from, _to, _tokenId);
+        emit Transfer(_from, _to, _tokenId);
     }
 
     /**
@@ -324,6 +369,7 @@ contract ERC721BasicToken is ERC721Basic {
         public
         canTransfer(_tokenId)
     {
+        // solium-disable-next-line arg-overflow
         safeTransferFrom(_from, _to, _tokenId, "");
     }
 
@@ -349,6 +395,7 @@ contract ERC721BasicToken is ERC721Basic {
         canTransfer(_tokenId)
     {
         transferFrom(_from, _to, _tokenId);
+        // solium-disable-next-line arg-overflow
         require(checkAndCallSafeTransfer(_from, _to, _tokenId, _data));
     }
 
@@ -370,10 +417,10 @@ contract ERC721BasicToken is ERC721Basic {
     * @param _to The address that will own the minted token
     * @param _tokenId uint256 ID of the token to be minted by the msg.sender
     */
-    function _mint(address _to, uint256 _tokenId) public {
+    function _mint(address _to, uint256 _tokenId) internal {
         require(_to != address(0));
         addTokenTo(_to, _tokenId);
-        Transfer(address(0), _to, _tokenId);
+        emit Transfer(address(0), _to, _tokenId);
     }
 
     /**
@@ -381,10 +428,10 @@ contract ERC721BasicToken is ERC721Basic {
     * @dev Reverts if the token does not exist
     * @param _tokenId uint256 ID of the token being burned by the msg.sender
     */
-    function _burn(address _owner, uint256 _tokenId) public {
+    function _burn(address _owner, uint256 _tokenId) internal {
         clearApproval(_owner, _tokenId);
         removeTokenFrom(_owner, _tokenId);
-        Transfer(_owner, address(0), _tokenId);
+        emit Transfer(_owner, address(0), _tokenId);
     }
 
     /**
@@ -397,7 +444,7 @@ contract ERC721BasicToken is ERC721Basic {
         require(ownerOf(_tokenId) == _owner);
         if (tokenApprovals[_tokenId] != address(0)) {
             tokenApprovals[_tokenId] = address(0);
-            Approval(_owner, address(0), _tokenId);
+            emit Approval(_owner, address(0), _tokenId);
         }
     }
 
@@ -449,23 +496,13 @@ contract ERC721BasicToken is ERC721Basic {
     }
 }
 
-interface ERC165 {
-    /// @notice Query if a contract implements an interface
-    /// @param interfaceID The interface identifier, as specified in ERC-165
-    /// @dev Interface identification is specified in ERC-165. This function
-    ///  uses less than 30,000 gas.
-    /// @return `true` if the contract implements `interfaceID` and
-    ///  `interfaceID` is not 0xffffffff, `false` otherwise
-    function supportsInterface(bytes4 interfaceID) external view returns (bool);
-}
-
 /**
  * @title Full ERC721 Token
  * This implementation includes all the required and some optional functionality of the ERC721 standard
  * Moreover, it includes approve all functionality using operator terminology
  * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
-contract ERC721Token is ERC721, ERC721BasicToken{
+contract ERC721Token is ERC721, ERC721BasicToken, Ownable {
     // Token name
     string internal name_;
 
@@ -473,7 +510,7 @@ contract ERC721Token is ERC721, ERC721BasicToken{
     string internal symbol_;
 
     // Mapping from owner to list of owned token IDs
-    mapping (address => uint256[]) internal ownedTokens;
+    mapping(address => uint256[]) internal ownedTokens;
 
     // Mapping from token ID to index of the owner tokens list
     mapping(uint256 => uint256) internal ownedTokensIndex;
@@ -490,7 +527,7 @@ contract ERC721Token is ERC721, ERC721BasicToken{
     /**
     * @dev Constructor function
     */
-    function ERC721Token(string _name, string _symbol) public {
+    constructor(string _name, string _symbol) public {
         name_ = _name;
         symbol_ = _symbol;
     }
@@ -562,6 +599,10 @@ contract ERC721Token is ERC721, ERC721BasicToken{
         tokenURIs[_tokenId] = _uri;
     }
 
+    function setTokenURI(uint256 _tokenId, string _uri) public onlyOwner {
+        _setTokenURI(_tokenId, _uri);
+    }
+
     /**
     * @dev Internal function to add a token ID to the list of a given address
     * @param _to address representing the new owner of the given token ID
@@ -572,6 +613,14 @@ contract ERC721Token is ERC721, ERC721BasicToken{
         uint256 length = ownedTokens[_to].length;
         ownedTokens[_to].push(_tokenId);
         ownedTokensIndex[_tokenId] = length;
+    }
+
+    /**
+    * @dev Gets the ownedTokens
+    * @return ownedTokens list
+    */
+    function ownedTokenList(address _owner) public view returns (uint256[]) {
+        return ownedTokens[_owner];
     }
 
     /**
@@ -603,11 +652,16 @@ contract ERC721Token is ERC721, ERC721BasicToken{
     * @param _to address the beneficiary that will own the minted token
     * @param _tokenId uint256 ID of the token to be minted by the msg.sender
     */
-    function _mint(address _to, uint256 _tokenId) public {
+    function _mint(address _to, uint256 _tokenId) internal {
         super._mint(_to, _tokenId);
 
         allTokensIndex[_tokenId] = allTokens.length;
         allTokens.push(_tokenId);
+    }
+
+    function mint(address _to, uint256 _tokenId, string _uri) public onlyOwner{
+        _mint(_to, _tokenId);
+        _setTokenURI(_tokenId, _uri);
     }
 
     /**
@@ -616,7 +670,7 @@ contract ERC721Token is ERC721, ERC721BasicToken{
     * @param _owner owner of the token to burn
     * @param _tokenId uint256 ID of the token being burned by the msg.sender
     */
-    function _burn(address _owner, uint256 _tokenId) public {
+    function _burn(address _owner, uint256 _tokenId) internal {
         super._burn(_owner, _tokenId);
 
         // Clear metadata (if any)
@@ -637,5 +691,8 @@ contract ERC721Token is ERC721, ERC721BasicToken{
         allTokensIndex[lastToken] = tokenIndex;
     }
 
-}
+    function burn(address _owner, uint256 _tokenId) public onlyOwner{
+        _burn(_owner, _tokenId);
+    }
 
+}

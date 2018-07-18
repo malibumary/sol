@@ -1,8 +1,10 @@
 pragma solidity ^0.4.18;
 
 
-//721 Token H 주소 : 0x7c68a2160575132fc9099b3573fdf1902c35c7fd
-//721 Token G 주소 : 0xc29fb173dab16d2406072593e29008d84185eb3f
+//721 Token Hv2 주소 : 0x8470e1132bc33ea157e9b29eca09c697f002ab16
+//721 Token Gv2 주소 : 0xadf771090b82aac965288e1776d7bdf2cb23b9e5
+//Kovan Gvk : 0x69bc5a558499f1cedfd5184d669c5943ae8b894c
+//Kovan Hvk : 0x0b75216d66a54efeaa12dc1167bd7de759946696
 // 제플린 참조 https://github.com/OpenZeppelin/zeppelin-solidity/tree/master/contracts
 /**
  * @title ERC721 Non-Fungible Token Standard basic interface
@@ -509,6 +511,14 @@ contract ERC721Token is ERC721, ERC721BasicToken{
     */
     function symbol() public view returns (string) {
         return symbol_;
+    }
+    
+    /**
+    * @dev Gets the ownedTokens
+    * @return ownedTokens list
+    */
+    function ownedTokenList(address _owner) public view returns (uint256[]) {
+        return ownedTokens[_owner];
     }
 
     /**
